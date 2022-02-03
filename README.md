@@ -1,140 +1,137 @@
-Contribution: 2022-01-10 00:00
+![MoonZoon Solana logos](./docs/images/MoonZoon_Solana.png)
 
-Contribution: 2022-01-10 00:01
+**Warning**: The implementation is blocked by https://github.com/project-serum/anchor/issues/883 - Anchor seems to be designed to work only with JS clients and I don't have enough free time and motivation to go through xxx lines of macros and JS atm, help welcome. See the original Rust-only [Voting example](https://github.com/MartinKavik/voting-solana-moonzoon) with the "raw" Solana API. 
 
-Contribution: 2022-01-10 00:02
+# Voting example (with Anchor)
 
-Contribution: 2022-01-10 00:03
+The [Rust](https://www.rust-lang.org/)-only Voting example based on MoonZoon and Solana.
 
-Contribution: 2022-01-10 00:04
+- [MoonZoon](http://moonzoon.rs/) is a Rust Fullstack Framework.
 
-Contribution: 2022-01-10 00:05
+- [Solana](https://solana.com/) is a decentralized blockchain.
 
-Contribution: 2022-01-10 00:06
+- [Anchor](https://github.com/project-serum/anchor) is framework for building and interacting with smart contracts on Solana.
 
-Contribution: 2022-01-10 00:07
+- _Notes:_ 
+   - This is not an official Solana example. The author is the MoonZoon's creator.
+   - The original [Voting example](https://github.com/MartinKavik/voting-solana-moonzoon) with the "raw" Solana API.
 
-Contribution: 2022-01-10 00:08
+![Pages](./docs/images/pages.png)
 
-Contribution: 2022-01-10 00:09
+---
 
-Contribution: 2022-01-10 00:10
+## Run on a local machine
 
-Contribution: 2022-01-10 00:11
+Follow the steps in [./program/README.md](./program/README.md)
+and then the ones in [./app/README.md](./app/README.md).
 
-Contribution: 2022-01-11 00:00
+---
 
-Contribution: 2022-01-11 00:01
+## Pages
 
-Contribution: 2022-01-11 00:02
+### Add Voter
 
-Contribution: 2022-01-12 00:00
+The page allows you to add a _voter_. 
 
-Contribution: 2022-01-12 00:01
+- A _voter_ is a regular Solana account. The app makes the voter eligible for voting by creating a _voter votes_ account associated with the given voter and the _voting state_. 
 
-Contribution: 2022-01-12 00:02
+- A _voting state_ is an account created by the app during the start (if not created yet) and associated with the _voting owner_. Voters are allowed to vote for 1 week - the _deadline_ is set in the _voting state_ account.
 
-Contribution: 2022-01-12 00:03
+- A _voting owner_ is an account fully controlled by the app.
 
-Contribution: 2022-01-12 00:04
+- You can find the pre-filled text input values in:
+   - [./program/keypairs/voting-owner-keypair.json](./program/keypairs/voting-owner-keypair.json)
+   - [./program/keypairs/voter-pubkey](./program/keypairs/voter-pubkey)
 
-Contribution: 2022-01-17 00:00
+_Note:_ See the section [Architecture](#architecture) for the visual representation of all relations.
 
-Contribution: 2022-01-17 00:01
+![Add Voter page](./docs/videos/add_voter.gif)
 
-Contribution: 2022-01-17 00:02
+### Add Party
 
-Contribution: 2022-01-17 00:03
+The page allows you to add a _party_. 
 
-Contribution: 2022-01-17 00:04
+- A _party_ is an account created by the app with the required party name and associated with the _voting state_.
 
-Contribution: 2022-01-17 00:05
+- Everybody with a sufficient amount of lamports can create a party.
 
-Contribution: 2022-01-17 00:06
+- You can find the pre-filled private key in:
+   - [./program/keypairs/voter-keypair.json](./program/keypairs/voter-keypair.json)
 
-Contribution: 2022-01-17 00:07
+_Note:_ You need to insert the private key in the text input because wallet integrations is out of scope of this example.
+- There wasn't (?) a Rust wallet connector at the time of writing and developing a new one from scratch or writing binding for JS libs like [sol-wallet-adapter](https://github.com/project-serum/sol-wallet-adapter) is too time consuming.
 
-Contribution: 2022-01-17 00:08
+![Add Party page](./docs/videos/add_party.gif)
 
-Contribution: 2022-01-17 00:09
+### Parties
 
-Contribution: 2022-01-18 00:00
+The page allows you to vote for the selected _party_. 
 
-Contribution: 2022-01-18 00:01
+- You can vote if you are eligible for voting (i.e. you've been registered on the page "Add Voter".)
 
-Contribution: 2022-01-18 00:02
+- You have 2 positive votes and 1 negative votes.
 
-Contribution: 2022-01-18 00:03
+- You can vote only once for each party.
 
-Contribution: 2022-01-18 00:04
+- You can send your negative vote only after you've already spent all your positive votes.
 
-Contribution: 2022-01-18 00:05
+- Party votes are updated in real time (just like adding a party).
 
-Contribution: 2022-01-18 00:06
+- You can find the pre-filled private key in:
+   - [./program/keypairs/voter-keypair.json](./program/keypairs/voter-keypair.json)
 
-Contribution: 2022-01-18 00:07
+_Note:_ This kind of a voting system is called [D21 - Janeček method](https://www.ih21.org/en/d21-janecekmethod).
 
-Contribution: 2022-01-18 00:08
+![Parties page](./docs/videos/parties.gif)
 
-Contribution: 2022-01-18 00:09
+---
 
-Contribution: 2022-01-18 00:10
+## Architecture
 
-Contribution: 2022-01-18 00:11
+The frontend part is based on the VDOM-less Rust frontend framework Zoon and compiled to Wasm. It means we can use the crate [solana-sdk](https://crates.io/crates/solana-sdk) directly instead of using intermediate Javascript libraries ([@solana/web3.js](https://solana-labs.github.io/solana-web3.js/)). 
 
-Contribution: 2022-01-19 00:00
+The advantages are:
 
-Contribution: 2022-01-19 00:01
+- Reduced complexity caused by multiple languages and their ecosystems in one project. It leads to faster development, better Developer eXperience and fewer bugs.
 
-Contribution: 2022-01-19 00:02
+- Improved performance thanks to Wasm + Rust. I can imagine that especially cryptographic operations are much faster in the Wasm runtime and could be parallelized in the future (if we can't use native browsers APIs like Web Crypto API). Also Zoon is faster than React or Svelte according to the [benchmarks](https://github.com/MoonZoon/MoonZoon#size--speed).
 
-Contribution: 2022-01-19 00:03
+- Onboarding and collaboration among team members should be easier thanks to one language in the tech stack and Rust static typing and other features.
 
-Contribution: 2022-01-27 00:00
+The frontend doesn't communicate directly with the blockchain because:
 
-Contribution: 2022-01-27 00:01
+- There is a business logic implemented in the backend. It also needs the access to the voting owner's keypair.
 
-Contribution: 2022-01-27 00:02
+- The crate [solana-client](https://crates.io/crates/solana-client/1.7.12) isn't suitable for the frontend - e.g. the transitive dependency [url](https://crates.io/crates/url/2.2.2) may even double the output Wasm file size. `serde` is another "heavy" dependency that could be replaced in the future.
 
-Contribution: 2022-01-27 00:03
+- `solana-client` doesn't cover all Solana real-time APIs currently.
 
-Contribution: 2022-01-27 00:04
+- Solana APIs are [rate limited](https://docs.solana.com/cluster/rpc-endpoints). We can, for instance, cache responses to avoid client fails.
 
-Contribution: 2022-01-27 00:05
+- The combination Fetch + Server-Sent Events may be superior to WebSockets in some cases (e.g. better compatibility with proxies and firewalls). However it depends on the app requirements.
 
-Contribution: 2022-01-27 00:06
+- The blockchain isn't very suitable for (complex) queries. You can query data mirrored in a database instead.
 
-Contribution: 2022-01-27 00:07
+_Note_: The schema below has been generated from the file [./docs/architecture.puml](./docs/architecture.puml).
 
-Contribution: 2022-01-27 00:08
+![Architecture](./docs/images/Architecture.svg)
 
-Contribution: 2022-01-27 00:09
+---
 
-Contribution: 2022-01-31 00:00
+## Contributing
 
-Contribution: 2022-01-31 00:01
+- Share your ideas and opinions on the [MoonZoon Discord](https://discord.gg/eGduTxK2Es).
 
-Contribution: 2022-01-31 00:02
+- File an issue in the GitHub repo when you encounter a bug or problems in docs.
 
-Contribution: 2022-01-31 00:03
+- Please use `cargo fmt` and `cargo clippy` and squash commits if it makes sense (I rebase PRs). 
 
-Contribution: 2022-01-31 00:04
+---
 
-Contribution: 2022-01-31 00:05
+## Solana Questions & Answers
 
-Contribution: 2022-01-31 00:06
+It's my ([@MartinKavik](https://github.com/MartinKavik)) first project with Solana / blockchain. Naturally, I had some beginner questions about the API, architecture and best practices. And I was lucky enough to get answers from the Solana master [@jstarry](https://github.com/jstarry) who works in Solana Labs.
 
-Contribution: 2022-01-31 00:07
+So I recommend to read these Q&A before your start to work on your Solana project. (_Note_: The repo hasn't been updated to follow recommendations mentioned in the answers.)
 
-Contribution: 2022-01-31 00:08
-
-Contribution: 2022-01-31 00:09
-
-Contribution: 2022-01-31 00:10
-
-Contribution: 2022-01-31 00:11
-
-Contribution: 2022-01-31 00:12
-
-Contribution: 2022-01-31 00:13
-
+[Questions.md](./questions.md)

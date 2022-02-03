@@ -1,0 +1,12 @@
+[programs.localnet]
+program = "4dKeVRjqyVNA3n48d1RGf3k2f8fEo1fGsUMPSmsHW4LG"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "keypairs/system-program-keypair.json"
+
+[scripts]
+test = "mocha -t 1000000 tests/"
